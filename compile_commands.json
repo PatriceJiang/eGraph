@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/Volumes/Code/Code/Proj/grahp-test/build",
+  "command": "/Volumes/Code/Apps/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -g -std=gnu++20 -arch arm64 -isysroot /Volumes/Code/Apps/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -o CMakeFiles/test-graph.dir/test-graph.cpp.o -c /Volumes/Code/Code/Proj/grahp-test/test-graph.cpp",
+  "file": "/Volumes/Code/Code/Proj/grahp-test/test-graph.cpp",
+  "output": "CMakeFiles/test-graph.dir/test-graph.cpp.o"
+},
+{
+  "directory": "/Volumes/Code/Code/Proj/grahp-test/build",
+  "command": "/Volumes/Code/Apps/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -g -std=gnu++20 -arch arm64 -isysroot /Volumes/Code/Apps/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -o CMakeFiles/test-graph.dir/AmazingGraph.cpp.o -c /Volumes/Code/Code/Proj/grahp-test/AmazingGraph.cpp",
+  "file": "/Volumes/Code/Code/Proj/grahp-test/AmazingGraph.cpp",
+  "output": "CMakeFiles/test-graph.dir/AmazingGraph.cpp.o"
+}
+]
