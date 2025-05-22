@@ -4,22 +4,29 @@
 using namespace Amazing::Graph;
 
 using IntNode = LambdaNode<InputSlots<>, OutputSlots<int>>;
+using IntNode2 = ValueNode<int>;
 
 int main(int , char **) {
     RunnableGraph graph;
 
     IntNode *a = graph.addNode<IntNode>([](auto &a, auto &b){
-        std::get<0>(b).deref() = 33;
+        b.template value<0>() = 33;
     });
 
-    IntNode *b = graph.addNode<IntNode>([](auto &a, auto &b){
-        std::get<0>(b).deref() = 44;
-    });
+//    IntNode *b = graph.addNode<IntNode>([](auto &a, auto &b){
+//        b.template value<0>() = 44;
+//    });
+    
+    IntNode2 * b = graph.addNode<IntNode2>(44);
+    
 
-    auto * add = graph.addNode<LambdaNode<InputSlots<int, int>, OutputSlots<int>>>([](auto &a, auto &b){
-        int a0 = std::get<0>(a).deref();
-        int b0 = std::get<0>(a).deref();
-        std::get<0>(b).deref() = a0 + b0;
+    using AddNode = LambdaNode<InputSlots<int, int>, OutputSlots<int>>;
+
+    auto * add = graph.addNode<AddNode>([](AddNode::input_type &a, AddNode::output_type &b){
+        int a0 = a.template value<0>();
+        int b0 = a.template value<1>();
+        b.template value<0>() = a0 + b0;
+        
     });
 
     graph.link<0, 0>(a, add);

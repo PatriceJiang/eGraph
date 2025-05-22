@@ -1,4 +1,5 @@
 #include "./AmazingGraph.h"
+#include <cstdarg>
 #include <cstddef>
 #include <cassert>
 
@@ -50,7 +51,7 @@ void RunnableGraph::clear() {
     m_links.clear();
     m_nodes.clear();
     m_sortedNodes.clear();
-    m_sortedNodesDirty = true;
+    m_sortedNodesDirty = false;
 }
 
 void RunnableGraph::run() {
