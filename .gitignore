@@ -1,4 +1,7 @@
 
 .cache
 build*
+*.S
+compile_commands.json
+
 

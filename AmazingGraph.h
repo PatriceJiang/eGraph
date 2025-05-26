@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -10,6 +11,18 @@
 
 namespace Amazing {
 namespace Graph {
+
+template <size_t curr, typename... ARGS>
+auto* tuple_at(std::tuple<ARGS...>& input, size_t n) {
+    static_assert(curr < sizeof...(ARGS), "n out of range!");
+    if (n == curr) {
+        return &std::get<curr>(input);
+    }
+    if constexpr (curr + 1 < sizeof...(ARGS)) {
+        return tuple_at<curr + 1>(input, n);
+    }
+    return reinterpret_cast<decltype(&std::get<0>(input))>(0);
+}
 
 class Slot {
 public:
@@ -34,7 +47,7 @@ public:
 };
 
 template <typename T>
-class InputSlot {
+class InputSlot : public AbstractInputSlot {
 public:
     T& deref() { return *m_data.lock(); }
 
@@ -46,7 +59,7 @@ private:
 };
 
 template <typename T>
-class OutputSlot {
+class OutputSlot : public AbstractOutputSlot {
 public:
     OutputSlot() {
         m_data = std::make_shared<T>();
@@ -62,7 +75,7 @@ private:
 };
 
 template <typename... ARGS>
-class InputSlots final {
+class InputGroup final {
 public:
     using slot_tuple = std::tuple<InputSlot<ARGS>...>;
     static constexpr size_t size = sizeof...(ARGS);
@@ -77,23 +90,16 @@ public:
         return std::get<N>(m_value).get();
     }
 
+    AbstractInputSlot* operator[](size_t n) {
+        return tuple_at<0>(m_value, n);
+    }
+
 private:
     slot_tuple m_value;
 };
 
-// template<>
-// class InputSlots<> final {
-// public:
-//     using slot_tuple = void;
-//     static constexpr size_t size = 0;
-//     auto defaults()
-//     {
-//         return {};
-//     }
-// }
-
 template <typename... ARGS>
-class OutputSlots final {
+class OutputGroup final {
 public:
     using slot_tuple = std::tuple<OutputSlot<ARGS>...>;
     static constexpr size_t size = sizeof...(ARGS);
@@ -108,6 +114,10 @@ public:
         return std::get<N>(m_value).get();
     }
 
+    AbstractOutputSlot* operator[](size_t n) {
+        return tuple_at<0>(m_value, n);
+    }
+
 private:
     slot_tuple m_value;
 };
@@ -115,8 +125,11 @@ private:
 template <typename Inputs, typename Outputs>
 class Node : public AbstractNode {
 public:
-    using input_type = Inputs;
-    using output_type = Outputs;
+    using InputSlots = Inputs;
+    using OutputSlots = Outputs;
+
+    constexpr static size_t InputSize = Inputs::size;
+    constexpr static size_t OutputSize = Outputs::size;
 
     // using input_tuple = typename Inputs::slot_tuple;
     // using output_tuple = typename Outputs::slot_tuple;
@@ -165,6 +178,8 @@ public:
 
     template <size_t SrcIdx, size_t DstIdx, typename S, typename T>
     void link(S* from, T* to) {
+        static_assert(SrcIdx < S::OutputSize, "SrcIdx out of range");
+        static_assert(DstIdx < T::InputSize, "DstIdx out of range");
         from->template linkTo<SrcIdx, DstIdx>(*to);
         m_links[from].downstreamNodes.emplace(to);
         m_links[to].upstreamNodes.emplace(from);
@@ -205,12 +220,12 @@ public:
     }
 
 private:
-    std::function<void(typename Super::input_type&, typename Super::output_type&)> m_func;
+    std::function<void(typename Super::InputSlots&, typename Super::OutputSlots&)> m_func;
 };
 
 template <typename T>
-class ValueNode final : public Node<InputSlots<>, OutputSlots<T>> {
-    using Super = Node<InputSlots<>, OutputSlots<T>>;
+class ValueNode final : public Node<InputGroup<>, OutputGroup<T>> {
+    using Super = Node<InputGroup<>, OutputGroup<T>>;
 
 public:
     explicit ValueNode(T v) : m_value(v) {};
